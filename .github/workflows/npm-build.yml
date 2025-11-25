@@ -1,4 +1,4 @@
-name: NPM Build Check
+name: PNPM Build Check
 
 permissions:
   pull-requests: write
@@ -16,7 +16,6 @@ jobs:
     name: Build with Node.js LTS
     runs-on: ubuntu-latest
 
-    # publish the resolved node version as an output for other jobs
     outputs:
       node_version: ${{ steps.get-node-version.outputs.node_version }}
 
@@ -24,33 +23,27 @@ jobs:
       - name: Checkout repository
         uses: actions/checkout@v4
 
-      - name: Setup Node.js LTS (with pnpm cache)
+      - name: Setup Node.js LTS (and enable pnpm cache)
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
           cache: "pnpm"
           cache-dependency-path: pnpm-lock.yaml
 
-      - name: Ensure pnpm is available (install if missing)
-        run: |
-          if ! command -v pnpm >/dev/null 2>&1; then
-            echo "pnpm not found — installing globally"
-            npm i -g pnpm
-          else
-            echo "pnpm already available: $(pnpm -v)"
-          fi
-          pnpm -v
+      - name: Setup pnpm (guarantee pnpm on PATH)
+        uses: pnpm/action-setup@v2
+        with:
+          version: "latest" # or '8' or specific version like '8.13.0'
 
-      - name: Display Node and pnpm versions
+      - name: Verify tools (debug)
         run: |
           echo "node: $(node -v)"
+          echo "npm: $(npm -v)"
           echo "pnpm: $(pnpm -v)"
-          echo "npm: $(npm -v || echo 'npm not found')"
 
       - name: Capture Node version to output
         id: get-node-version
         run: |
-          # write the node version to GITHUB_OUTPUT so it can be used as a job output
           echo "node_version=$(node -v)" >> "$GITHUB_OUTPUT"
 
       - name: Install dependencies
@@ -95,7 +88,6 @@ jobs:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
-
             const nodeVersion = process.env.NODE_VERSION || 'unknown';
 
             if (pr) {
