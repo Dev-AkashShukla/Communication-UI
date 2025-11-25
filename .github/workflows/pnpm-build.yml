@@ -1,94 +1,84 @@
-name: PNPM Build Check
+name: PR Build Check
+
+on:
+  pull_request:
+    branches: ["main"]
 
 permissions:
   pull-requests: write
   contents: read
   issues: write
 
-on:
-  pull_request:
-    branches: [main]
-  push:
-    branches: [main]
+concurrency:
+  group: pr-build-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: true
 
 jobs:
-  npm-build:
-    name: Build with Node.js LTS
+  build:
+    name: Build Test
     runs-on: ubuntu-latest
 
-    outputs:
-      node_version: ${{ steps.get-node-version.outputs.node_version }}
-
     steps:
-      - name: Checkout repository
+      - name: Checkout code
         uses: actions/checkout@v4
 
-      - name: Setup Node.js LTS (and enable pnpm cache)
+      - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
           node-version: "lts/*"
-          cache: "pnpm"
-          cache-dependency-path: pnpm-lock.yaml
 
-      - name: Setup pnpm (guarantee pnpm on PATH)
-        uses: pnpm/action-setup@v2
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
         with:
-          version: "latest" # or '8' or specific version like '8.13.0'
+          version: 9
 
-      - name: Verify tools (debug)
+      - name: Debug pnpm install
         run: |
-          echo "node: $(node -v)"
-          echo "npm: $(npm -v)"
-          echo "pnpm: $(pnpm -v)"
-
-      - name: Capture Node version to output
-        id: get-node-version
-        run: |
-          echo "node_version=$(node -v)" >> "$GITHUB_OUTPUT"
+          echo "PATH:"
+          echo $PATH
+          echo "pnpm location:"
+          which pnpm || echo "pnpm not found"
+          echo "pnpm version:"
+          pnpm --version || echo "pnpm not installed"
 
       - name: Install dependencies
-        run: pnpm install --frozen-lockfile
+        run: pnpm install
 
       - name: Run build
         run: pnpm run build
 
   post-success-review:
     if: success() && github.event_name == 'pull_request'
-    needs: npm-build
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Post build success review (PR)
+      - name: Post build success review
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
-            if (!pr) return;
-
             const prNumber = pr.number;
-            const nodeVersion = process.env.NODE_VERSION || 'unknown';
+
             await github.rest.pulls.createReview({
               owner: context.repo.owner,
               repo: context.repo.repo,
               pull_number: prNumber,
               event: "COMMENT",
-              body: `✅ Build passed on **${nodeVersion}**. Good to merge.`
+              body: `✅ Build passed successfully. Good to merge.`
             });
-        env:
-          NODE_VERSION: ${{ needs.npm-build.outputs.node_version }}
 
   notify-on-failure:
     if: failure()
-    needs: npm-build
+    needs: build
     runs-on: ubuntu-latest
     steps:
-      - name: Notify on build failure (PR or push)
+      - name: Notify on build failure
         uses: actions/github-script@v7
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
             const pr = context.payload.pull_request;
-            const nodeVersion = process.env.NODE_VERSION || 'unknown';
 
             if (pr) {
               const prNumber = pr.number;
@@ -99,7 +89,7 @@ jobs:
                 repo: context.repo.repo,
                 pull_number: prNumber,
                 event: "REQUEST_CHANGES",
-                body: `❌ Build failed on **${nodeVersion}**.\n\n@${user}, please fix the issues in the pipeline.`
+                body: `❌ Build failed.\n\n@${user}, please fix the issues in the pipeline.`
               });
             } else {
               const pusher = context.payload.pusher ? context.payload.pusher.name : 'unknown';
@@ -108,9 +98,7 @@ jobs:
                 owner: context.repo.owner,
                 repo: context.repo.repo,
                 title: '🚨 Build failed on main branch',
-                body: `❌ Build failed on **${nodeVersion}**.\n\n@${pusher}, please investigate and fix the issue.`,
+                body: `❌ Build failed.\n\n@${pusher}, please investigate and fix the issue.`,
                 labels: ['ci-failure', 'automated'],
               });
             }
-        env:
-          NODE_VERSION: ${{ needs.npm-build.outputs.node_version }}
