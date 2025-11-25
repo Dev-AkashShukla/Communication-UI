@@ -1,3 +1,4 @@
+// app/layout.js (root layout)
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
 
@@ -13,8 +14,6 @@ const geistMono = Geist_Mono({
 
 export const metadata = {
   title: {
-    //add the metadataBase
-    // metadataBase: "",
     default: "Indi Com",
     template: "%s | Indi Com",
   },
