@@ -1,0 +1,109 @@
+name: NPM Build Check
+
+permissions:
+  pull-requests: write
+  contents: read
+  issues: write
+
+on:
+  pull_request:
+    branches: [main]
+  push:
+    branches: [main]
+
+jobs:
+  npm-build:
+    runs-on: ubuntu-latest
+    name: Build with Node.js LTS
+
+    outputs:
+      node_version: ${{ steps.node-version.outputs.node_version }}
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Setup Node.js LTS
+        uses: actions/setup-node@v4
+        with:
+          node-version: "lts/*"
+          cache: "pnpm"
+          cache-dependency-path: pnpm-lock.yaml
+
+      - name: Install pnpm (if not present)
+        run: |
+          core_version="$(pnpm -v 2>/dev/null || echo '')"
+          if [ -z "$core_version" ]; then
+            npm i -g pnpm
+          fi
+          pnpm -v
+
+      - name: Display Node.js version
+        id: node-version
+        run: |
+          echo "node_version=$(node -v)" >> "$GITHUB_OUTPUT"
+          echo "node -v:"
+          node -v
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Run build
+        run: pnpm run build
+
+  post-success-review:
+    if: success() && github.event_name == 'pull_request'
+    needs: npm-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Post build success review
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+            const prNumber = pr.number;
+            const nodeVersion = "${{ needs.npm-build.outputs.node_version }}";
+
+            await github.rest.pulls.createReview({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              pull_number: prNumber,
+              event: "COMMENT",
+              body: `✅ Build passed on **${nodeVersion}**. Good to merge.`
+            });
+
+  notify-on-failure:
+    if: failure()
+    needs: npm-build
+    runs-on: ubuntu-latest
+    steps:
+      - name: Notify on build failure
+        uses: actions/github-script@v7
+        with:
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            const pr = context.payload.pull_request;
+
+            if (pr) {
+              const prNumber = pr.number;
+              const user = pr.user.login;
+
+              await github.rest.pulls.createReview({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                pull_number: prNumber,
+                event: "REQUEST_CHANGES",
+                body: `❌ Build failed on **${{ needs.npm-build.outputs.node_version }}**.\n\n@${user}, please fix the issues in the pipeline.`
+              });
+            } else {
+              const pusher = context.payload.pusher ? context.payload.pusher.name : 'unknown';
+
+              await github.rest.issues.create({
+                owner: context.repo.owner,
+                repo: context.repo.repo,
+                title: '🚨 Build failed on main branch',
+                body: `❌ Build failed on **${{ needs.npm-build.outputs.node_version }}**.\n\n@${pusher}, please investigate and fix the issue.`,
+                labels: ['ci-failure', 'automated'],
+              });
+            }
