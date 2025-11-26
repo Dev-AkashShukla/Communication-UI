@@ -1,3 +1,4 @@
+
 "use client";
 
 import { useState } from "react";
@@ -13,6 +14,7 @@ export default function ForgotPasswordPage() {
   const handleSubmit = async (e) => {
     e.preventDefault();
     setIsLoading(true);
+
     setTimeout(() => {
       setSubmitted(true);
       setIsLoading(false);
@@ -28,9 +30,13 @@ export default function ForgotPasswordPage() {
               <span className="text-white font-bold text-xl">IC</span>
             </div>
           </div>
-          <CardTitle className="text-2xl font-bold text-center">Reset password</CardTitle>
+          <CardTitle className="text-2xl font-bold text-center">
+            Reset password
+          </CardTitle>
           <CardDescription className="text-center">
-            {submitted ? "Check your email for a reset link" : "Enter your email to receive a password reset link"}
+            {submitted
+              ? "Check your email for a reset link"
+              : "Enter your email to receive a password reset link"}
           </CardDescription>
         </CardHeader>
         {!submitted ? (
@@ -53,7 +59,10 @@ export default function ForgotPasswordPage() {
                 {isLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
                 Send reset link
               </Button>
-              <Link href="/auth/login" className="text-center text-sm text-blue-600 hover:text-blue-700 hover:underline">
+              <Link
+                href="/auth/login"
+                className="text-center text-sm text-blue-600 hover:text-blue-700 hover:underline"
+              >
                 Back to login
               </Link>
             </CardFooter>
@@ -63,7 +72,10 @@ export default function ForgotPasswordPage() {
             <div className="text-center text-sm text-muted-foreground">
               We've sent a password reset link to <strong>{email}</strong>
             </div>
-            <Link href="/auth/login" className="text-center text-sm text-blue-600 hover:text-blue-700 hover:underline">
+            <Link
+              href="/auth/login"
+              className="text-center text-sm text-blue-600 hover:text-blue-700 hover:underline"
+            >
               Back to login
             </Link>
           </CardFooter>

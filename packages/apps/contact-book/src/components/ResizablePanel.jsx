@@ -2,7 +2,12 @@
 
 import { useState, useRef, useEffect } from "react";
 
-export function ResizablePanel({ children, minWidth = 250, maxWidth = 500, defaultWidth = 350 }) {
+export function ResizablePanel({ 
+  children, 
+  minWidth = 250, 
+  maxWidth = 500, 
+  defaultWidth = 350 
+}) {
   const [width, setWidth] = useState(defaultWidth);
   const [isResizing, setIsResizing] = useState(false);
   const panelRef = useRef(null);
@@ -37,13 +42,14 @@ export function ResizablePanel({ children, minWidth = 250, maxWidth = 500, defau
   return (
     <div
       ref={panelRef}
-      className="relative flex-shrink-0 transition-all duration-200"
+      className="relative flex-shrink-0"
       style={{ width: `${width}px` }}
     >
       {children}
+      {/* Resize Handle */}
       <div
         className={`absolute top-0 right-0 w-1 h-full cursor-col-resize hover:bg-blue-500 transition-colors ${
-          isResizing ? "bg-blue-500" : "bg-border"
+          isResizing ? "bg-blue-500" : "bg-transparent hover:bg-blue-400"
         }`}
         onMouseDown={() => setIsResizing(true)}
       />
