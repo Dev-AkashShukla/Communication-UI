@@ -1,0 +1,18 @@
+{
+  "name": "indi-com-ui",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "turbo run dev",
+    "build": "turbo run build",
+    "lint": "turbo run lint",
+    "dev:main": "turbo run dev --filter=@indi-com/main",
+    "dev:contact": "turbo run dev --filter=@indi-com/contact-book",
+    "build:main": "turbo run build --filter=@indi-com/main",
+    "build:contact": "turbo run build --filter=@indi-com/contact-book"
+  },
+  "packageManager": "pnpm@8.6.6",
+  "devDependencies": {
+    "turbo": "^2.3.3"
+  }
+}
