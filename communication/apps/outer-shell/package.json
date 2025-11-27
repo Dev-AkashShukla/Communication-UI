@@ -1,5 +1,5 @@
 {
-  "name": "@indi-com/main",
+  "name": "@indi-com/outer-shell",
   "version": "0.1.0",
   "private": true,
   "scripts": {

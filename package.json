@@ -6,9 +6,10 @@
     "dev": "turbo run dev",
     "build": "turbo run build",
     "lint": "turbo run lint",
-    "dev:main": "turbo run dev --filter=@indi-com/main",
+    
+    "dev:main": "turbo run dev --filter=@indi-com/outer-shell",  
     "dev:contact": "turbo run dev --filter=@indi-com/contact-book",
-    "build:main": "turbo run build --filter=@indi-com/main",
+    "build:main": "turbo run build --filter=@indi-com/outer-shell",
     "build:contact": "turbo run build --filter=@indi-com/contact-book"
   },
   "packageManager": "pnpm@8.6.6",

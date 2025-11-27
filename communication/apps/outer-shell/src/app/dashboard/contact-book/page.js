@@ -17,7 +17,7 @@ export default function ContactBookPage() {
 
       {/* Contact Book App running on Port 3034 */}
       <iframe 
-        src="http://localhost:3034" 
+        src="http://192.168.1.202:3034" 
         className="w-full h-full border-none"
         title="Contact Book Module"
         onLoad={() => setIsLoading(false)}

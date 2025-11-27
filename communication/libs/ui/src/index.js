@@ -31,6 +31,9 @@ export { AlertDialog,
   AlertDialogTrigger,
 } from "./components/ui/alert-dialog";
 
+export {Checkbox} from "./components/ui/checkbox";
+export {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./components/ui/select";
+
 export { cn } from "./lib/utils";
 export { useIsMobile } from "./hooks/use-mobile";
 export { useLocalStore } from "./hooks/useLocalStore";

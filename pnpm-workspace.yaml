@@ -1,3 +1,4 @@
 packages:
-  - 'packages/apps/*'
-  - 'packages/libs/*'
+  - 'communication/*'
+  - 'communication/apps/*' 
+  - 'communication/libs/*'
