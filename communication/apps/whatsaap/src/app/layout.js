@@ -1,8 +1,7 @@
 // src/app/layout.js
 import { Geist, Geist_Mono } from "next/font/google";
 import "./globals.css";
-import FrameGuard from "@/components/FrameGuard";
-
+import FrameGuard from "../components/FrameGuard";
 const geistSans = Geist({
   variable: "--font-geist-sans",
   subsets: ["latin"],

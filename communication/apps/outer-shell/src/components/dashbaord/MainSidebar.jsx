@@ -13,8 +13,8 @@ import { Button } from "@indi-com/ui";
 const mainMenuItems = [
   { id: "master", name: "Contacts", path: "/dashboard/contact-book", icon: User },
   { id: "whatsapp", name: "WhatsApp", path: "/dashboard/whatsapp", icon: MessageCircle },
-  { id: "telegram", name: "Telegram", path: "/dashboard/telegram", icon: Send },
-  { id: "sms", name: "SMS", path: "/dashboard/sms", icon: Smartphone },
+  // { id: "telegram", name: "Telegram", path: "/dashboard/contact-book", icon: Send },
+  // { id: "sms", name: "SMS", path: "/dashboard/contact-book", icon: Smartphone },
 ];
 
 export function MainSidebar() {

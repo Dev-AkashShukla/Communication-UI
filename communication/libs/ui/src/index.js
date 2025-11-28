@@ -33,7 +33,9 @@ export { AlertDialog,
 
 export {Checkbox} from "./components/ui/checkbox";
 export {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "./components/ui/select";
-
+export {ResizablePanel} from "./components/ui/resizable-panel";
+export {sheetVariants, Sheet, SheetContent, SheetHeader, SheetTitle, SheetTrigger, SheetFooter} from "./components/ui/sheet";
+export { Switch } from "./components/ui/switch"; 
 export { cn } from "./lib/utils";
 export { useIsMobile } from "./hooks/use-mobile";
 export { useLocalStore } from "./hooks/useLocalStore";
